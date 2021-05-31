@@ -1,0 +1,192 @@
+<html>
+    <canvas id="Game" width="800" height="600">
+
+    </canvas>
+    <script>
+        var canvas;//dimension
+        var context;//graphical info
+        var ballx=50;
+        var speed=5;
+        var bally=50;
+        var speedy=5;
+        var pad1=250;
+        var scoreval1=0;
+        var scoreval2=0;
+        const padheight=100;
+        const padthick=10;
+        var pad2=250;
+        const winningscore=1;
+        var show=false;
+        
+        function mouse(evt)
+        {
+            var rect=canvas.getBoundingClientRect();
+            var root=document.documentElement;
+            var mousex=evt.clientX-rect.left-root.scrollLeft;
+            var mousey=evt.clientY-rect.top-root.scrollTop;
+            return {
+                x:mousex,
+                y:mousey
+                //mousex,mousey
+            };
+        }
+        function mouseclick(evt)
+        {
+            if(show)
+            {
+                show=false;
+            }
+        }
+        window.onload=function()
+        {
+            canvas=document.getElementById('Game');
+            context=canvas.getContext('2d');
+            var frame=30;//frame rate
+            setInterval(bothcall,1000/frame);//calling function every second
+            //draw(); 
+            canvas.addEventListener('mousedown',mouseclick)
+            canvas.addEventListener('mousemove',function(evt)
+            {
+                var mousepos=mouse(evt);
+                pad1=mousepos.y-(padheight/2);
+            });
+        }
+        function ballreset()
+        {
+            if(scoreval1==winningscore)
+            {
+                scoreval1=0;
+                scoreval2=0;
+                alert("Player 1 wins!")
+                show=true;
+                //show=confirm("Do you want to continue?");
+            }
+            else if(scoreval2==winningscore)
+            {
+                scoreval2=0;
+                scoreval1=0;
+                alert("Player 2 wins!");
+                //show=confirm("Do you want to continue?");
+                show=true;
+            }
+            speed=-speed;
+            ballx=canvas.width/2;
+            bally=canvas.height/2;
+        }
+        function movement()
+        {//ai
+            var cent=pad2+(padheight)/2;
+            if(cent<bally-35)//prevent jerks, hit anywhere in the paddle
+            {
+                pad2=pad2+5;
+            }
+            else if(cent>bally+35){
+                pad2=pad2-5;
+            }
+        }
+        function bothcall()
+        {
+            move();
+            draw();
+        }
+        function move()
+        {
+            if(show)
+            {
+                return;
+            }
+            movement();
+            ballx=ballx+speed;
+            if(ballx>canvas.width)
+            {
+                if(bally>pad2&&bally<pad2+padheight)
+                {
+                    speed=-speed;
+                    var deltay=bally-(pad2+padheight/2);
+                    speedy=deltay*.35;//speed and angle of deflection
+                }
+                else
+                {
+                    scoreval1+=1;
+                    ballreset();
+                    
+                }
+                //speed=-speed;
+            }
+            else if(ballx<0)
+            {
+                if(bally>pad1&&bally<pad1+padheight)
+                {
+                    speed=-speed;
+                    var deltay=bally-(pad1+padheight/2);
+                    speedy=deltay*.35;
+                }
+                else
+                {
+                    scoreval2+=1;
+                    ballreset();
+                    
+                }
+                //speed=-speed;
+            }
+            bally=bally+speedy;
+            if(bally>canvas.height)
+            {
+                speedy=-speedy;
+            }
+            else if(bally<0)
+            {
+                speedy=-speedy;
+            }
+        }
+        function dotted()
+        {
+            for(i=0;i<canvas.height;i+=40)
+            {
+                color(canvas.width/2-1,i,2,25,'white');
+            }
+        }
+        function draw()
+        {
+            
+            color(0,0,canvas.width,canvas.height,'black');
+            if(show)
+            {
+                context.fillStyle='white';
+                context.fillText("Click to continue",canvas.width/2-50,100);
+                return;
+            }
+            dotted();
+            //color(ballx,200,10,10,'red');
+            color(0,pad1,padthick,padheight,'white');//left paddle
+            color(canvas.width-padthick,pad2,padthick,padheight,'white');//right paddle
+            /*context.fillStyle="black";
+            context.fillRect(0,0,canvas.width,canvas.height);
+           
+            context.fillStyle="red";
+            context.fillRect(ballx,200,10,10);
+            context.fillStyle="white";
+            context.fillRect(0,250,10,100);
+            context.fillStyle='white';
+            context.beginPath();
+            context.arc(ballx,100,5,0,Math.PI*2,true);//flase gives other part of circle
+            context.fill();*/
+            //color(canvas.width/2,0,5,canvas.height,'white');//midline
+            Colcircle(ballx,bally,5,'white');
+            context.fillText(scoreval1,100,100);
+            context.fillText(scoreval2,canvas.width-100,100);
+        }
+        function Colcircle(centx,centy,rad,col)
+        {
+            context.fillStyle=col;
+            context.beginPath();
+            context.arc(centx,centy,rad,0,Math.PI*2,true);//flase gives other part of circle
+            context.fill();
+        }
+        function color(leftx,topy,width,height,draw)
+        {
+            context.fillStyle=draw;
+            context.fillRect(leftx,topy,width,height);
+        }
+    </script>
+</html>
